@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.16)
+project(torky-lakehouse-bridges LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+include_directories(include)
+add_executable(torky-lakehouse-query src/torky_cli_kernel.cpp)
+target_compile_options(torky-lakehouse-query PRIVATE -O3 -Wall -pthread)
