@@ -1,31 +1,56 @@
-# `torky-lakehouse-bridges` — Backend 7: 10B-100B Out-of-Core BigInt Lakehouse Studio
-**Subtitle:** Cores 063-072 | Mode B 83.82 GiB Disk Stream, DuckDB, Snowflake & Photon  
+# `torky-lakehouse-bridges` — 1B vs. 10B Out-of-Core Lakehouse & DuckDB/Arrow Benchmark Studio
+
+**Subtitle:** O(TILE_SIZE) RAM Invariance (487.12 MiB at 10B), Golden Syndrome & 2-Process Cold Restart  
 **Author & Chief Architect:** Dr. Amr Torky  
-**Accreditation:** ISO/IEC 17025:2017 (`1dd69a153b00`) & ISO/IEC 42001:2023  
-**Permanent WORM DOIs:** CERN/Zenodo `10.5281/zenodo.1dd69a153b00` & `10.5281/zenodo.22785402`  
-**Live Interactive Mission Control:** [https://amrtorky.github.io/torky-lakehouse-bridges/](https://amrtorky.github.io/torky-lakehouse-bridges/)
+**Release Version:** `v5.0.0-omega` (118-Core Sovereign Upgrade)  
+**Live Interactive Studio:** [https://amrtorky.github.io/torky-lakehouse-bridges/](https://amrtorky.github.io/torky-lakehouse-bridges/)  
+**Internal Metrological Crosswalk Seal:** `1dd69a153b00` (ISO/IEC 17025:2017 & ISO/IEC 42001:2023 Clause-to-Record Crosswalk)  
+**WORM Ledger Anchors:** `10.5281/zenodo.1dd69a153b00` & `10.5281/zenodo.22785402`  
 
-## 1. Dedicated Separated C++20 Backend & Zero-Disclosure C ABI
-This repository compiles its own dedicated native C++20 backend (`src/dedicated_backend_engine.cpp` -> `build/dedicated_backend_engine`) and links against the stripped Zero-Disclosure C ABI library (`libgovernance_core.so`).
+---
 
-## 2. Sovereign Cores Hosted in This Repository (Part of the 118-Core AT-ACE Engine)
-| Core ID | CLI Tool Name | Core Function | User & Enterprise Benefit |
-|:---:|:---|:---|:---|
-| **#063** | `torky-arrow-in` | Apache Arrow Zero-Copy Packer | Ingests Arrow columnar batches into 9-byte TORKY_CELL_DTYPE structs at >102.7M cells/sec. |
-| **#064** | `torky-duckdb-scan` | DuckDB 512MB Out-of-Core Scanner | Streams 9-byte binary tables into DuckDB under a 512MB cap without external hash-spill stalls. |
-| **#065** | `torky-tile-stream` | Mode B Strict Disk Tile Streamer (10B) | Streams 200 tiles of 50M records (83.82 GiB) on ext4 at 60.44 MB/s under 487.12 MiB peak RAM. |
-| **#066** | `torky-golden-syndrome` | 64-Bit Golden Ratio Syndrome Verifier | Prevents 2^32 index overflow and recovers low32 bits via 0x9E3779B9 * 0x144CBC89 == 1 mod 2^32. |
-| **#067** | `torky-snowflake-xs` | Snowflake BINARY(9) & SPCS Optimizer | Shrinks 10B micro-partitions from 2.69 TiB to 83.82 GiB; runs on X-Small Warehouse with 0 spill. |
-| **#068** | `torky-photon-simd` | Databricks Photon AVX-512 SIMD Kernel | Executes Cardano cos/arccos across 16 FP32 lanes with 100% Photon task time and 0 JVM fallback. |
-| **#069** | `torky-parquet-out` | ZSTD 9-Byte Parquet Partition Writer | Serializes governed continuum cells into ZSTD-compressed Parquet files for S3/ADLS/GCS. |
-| **#070** | `torky-delta-sync` | Delta Lake & Iceberg v2 ACID Fencer | Commits SHA-256 Merkle state transitions into Apache Iceberg v2 metadata manifests. |
-| **#071** | `torky-polars-zero` | Polars LazyFrame Predicate Pushdown | Filters 10B records by 1-byte gov_byte (9.31 GiB layer) on disk before vector synthesis. |
-| **#072** | `torky-cgroup-enforce` | Linux 512 MiB Cgroup RSS Enforcer | Audits kernel VmRSS (218.03 MiB at 100B stream; 487.12 MiB at 10B build) for ZERO compliance. |
+## 1. Domain Role & Dedicated C++20 Backend Architecture
+`torky-lakehouse-bridges` operates its own dedicated C++20 hardware-aligned backend (`./build/torky-lakehouse-bridges-dedicated-engine` compiled from `./src/dedicated_engine_backend.cpp` and `./include/torky_continuum_core.hpp`) alongside the controlled verification runners (`./run_audit.sh`, `./custom_input_runner.py`, and `./maria_ceos_controlled_test.py`).
 
-## 3. 30-Second Independent Terminal Reproduction
+### Custom 4-Stage Engine Roadmap
+- **STAGE 1: TILE STREAMING:** Stream 200 tiles of 50M records on native ext4 (Zero Errno 12)
+- **STAGE 2: GOLDEN SYNDROME:** Encode 64-bit index via 0x9E3779B9 * 0x144CBC89 == 1 mod 2^32
+- **STAGE 3: PROCESS 1 FLUSH:** Write 83.82 GiB (90GB) to NVMe & terminate Process 1 (RAM=0)
+- **STAGE 4: COLD RESTART VERIFY:** Boot Process 2 read-only & verify 10^10 records (100.0000%)
+
+### 7 Specialized Capabilities & Simulation Features in This Module
+- Complete 3-Profile Benchmark Transparency: 1B Physical Disk (`8.38 GiB`, `42.98 s`), 10B Mode A Folded (`0.15 MiB`, `0.38 s`), and 10B Mode B Strict NVMe (`83.82 GiB`, `1,489.06 s`)
+- Empirical Proof of `O(TILE_SIZE)` RAM Invariance for Maria Kollia's ZERO Framework (`10x` dataset growth -> peak RAM moves only from `402.82 MiB` to `487.12 MiB` < `512 MiB` cap)
+- 64-Bit Unsigned Index Overflow Protection past `2^32 = 4.29B` via Golden Ratio Modular Inverse (`0x9E3779B9 * 0x144CBC89 === 1 mod 2^32`)
+- Resolution of WSL2 `/mnt/d/` 9P DrvFs `OSError: [Errno 12]` via Native Linux `ext4` Sequential Tile-Streaming
+- 2-Process Cold-Restart Verification Harness (Process 1 terminates destroying 100% volatile RAM -> Process 2 boots cold and verifies `10^10 / 10^10` records)
+- Snowflake `BINARY(9)` Micro-Partition & Databricks C++ Photon AVX-512 Zero-Spill Integration
+- DuckDB & Apache Arrow Out-of-Core Baseline Comparator under strict `SET memory_limit = '512MB'`
+
+---
+
+## 2. Controlled Verification & Pre-Execution Governance Enforcement (CEOS & ZERO Alignment)
+To run a small, controlled test using synthetic data that demonstrates `HOLD`, `DENY`, and `ESCALATE` preventing the protected action while `PROCEED` permits it—and preserves inputs, observable execution outcomes, audit records, and actual peak memory measurements:
+
 ```bash
-git clone https://github.com/AmrTorky/torky-lakehouse-bridges.git && cd torky-lakehouse-bridges
-g++ -O3 -std=c++20 -march=native -Iinclude src/dedicated_backend_engine.cpp -o build/dedicated_backend_engine
-./build/dedicated_backend_engine -3.5 1.2
+cd torky-lakehouse-bridges
+# 1. Run Controlled 4-State Synthetic Verification Test
+python3 ./maria_ceos_controlled_test.py --records 1000 --seed 20261101 --out-dir ./audit_artifacts
+
+# 2. Run 7-Pass Audit Script & Custom Input Runner
 ./run_audit.sh --input ./examples/sample_vectors.csv
+python3 ./custom_input_runner.py --repo torky-lakehouse-bridges
+
+# 3. Compile & Execute Dedicated C++20 Backend
+g++ -O3 -std=c++20 -march=native -Wall -Wextra -Iinclude src/dedicated_engine_backend.cpp -o build/torky-lakehouse-bridges-dedicated-engine
+./build/torky-lakehouse-bridges-dedicated-engine --verify 0.0
 ```
+
+---
+
+## 3. Mathematical & Memory Invariants Enforced
+- **Master Scale Triple:** $l_a = e^{-1}\text{ nm} \approx 0.36787944117\text{ nm}$, $\epsilon = 0.016\text{ nm}^2$, $\Xi_{T,\text{norm}} \approx 1.02 \times 10^{60}$.
+- **Zero-Singularity Potential:** $V_{\text{finite}}(r) = \frac{1.440}{\sqrt{r^2 + 0.016}} \implies V_{\text{finite}}(0) = 11.384\text{ eV} < \infty$ (`0.00%` NaN crashes).
+- **Cardano-Viète $\mathcal{O}(1)$ Reconstruction:** $x^* = \text{sgn}(h)\frac{2}{\sqrt{3}}\cos\left(\frac{1}{3}\arccos\left(-\frac{3\sqrt{3}\epsilon h}{8}\right)\right)$.
+- **Spectral Hessian Clamp:** $\kappa(H) \le 18.50$ via dynamic Tikhonov shift $\alpha = \frac{\lambda_{\max} - 18.50\lambda_{\min}}{17.50}$.
+- **9-Byte Packed Cell (`TORKY_CELL_DTYPE`):** `96.96%` storage reduction vs. 296-byte 64-D float32 records, operating strictly below the `512 MiB` RAM ceiling.
