@@ -1,10 +1,5 @@
-cmake_minimum_required(VERSION 3.16)
-project(torky-lakehouse-bridges CXX)
-
+cmake_minimum_required(VERSION 3.20)
+project(sovereign_engine CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-add_compile_options(-O3 -mavx2 -march=native -Wall -Wextra)
 include_directories(include)
-
-add_executable(test_lakehouse tests/test_lakehouse_bridges.cpp)
